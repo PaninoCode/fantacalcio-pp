@@ -1,0 +1,3 @@
+# Fantacalcio++
+
+Gioco del Fantacalcio.
