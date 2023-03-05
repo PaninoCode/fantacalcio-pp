@@ -24,9 +24,26 @@ fn not_found(req: &rocket::Request<'_>) -> Json<NotFoundError> {
 
 #[launch] //Launching rocket
 fn rocket() -> _ {
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap(); //Creating a TcpListener to get a free port
-    let port = listener.local_addr().unwrap().port(); //Getting the port
-    drop(listener); //Dropping the listener
+    let port; //Initializing the port variable
+
+    fn check_default_port() -> bool { //Creating a function to check if the default port (39136) is free
+        match TcpListener::bind("127.0.0.1:39136") {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
+
+    if check_default_port() {
+        println!("The default port (39136) is free. Using it.");
+        port = 39136; //Setting the port to the default port (39136)
+    }else{
+        println!("The default port (39136) is already in use. Please close the application that is using it.");
+        let listener; //Creating a TcpListener
+        listener = TcpListener::bind("127.0.0.1:0").unwrap(); //Checking if the default port (39136) is free
+    
+        port = listener.local_addr().unwrap().port(); //Getting the port
+        drop(listener); //Dropping the listener
+    }
 
     let figment = rocket::Config::figment() //Creating a figment (Rocket's configuration)
         .merge(("address", "127.0.0.1")) //Setting the address to localhost
@@ -35,4 +52,5 @@ fn rocket() -> _ {
         .merge(("log_level", "normal")); //Disabling the logs in the console
 
     rocket::custom(figment).mount("/", routes![index]).register("/", catchers![not_found]) //Creating the rocket instance
+
 }
