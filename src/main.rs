@@ -1,11 +1,37 @@
 use std::net::TcpListener; //Importing the library for the TcpListener
 use rocket::serde::{Serialize, json::Json}; //Importing the rocket library for the Json type
+use rocket::http::Header;
+use rocket::{Request, Response};
+use rocket::fairing::{Fairing, Info, Kind};
 
 #[macro_use] extern crate rocket; //Importing the rocket library
 
 #[get("/")] //Defining the route -> GET /
 fn index() -> &'static str {
     "plugin, active"
+}
+
+#[options("/<_..>")]
+fn all_options() {
+    // Do nothing
+}
+pub struct CORS;
+
+#[rocket::async_trait]
+impl Fairing for CORS {
+    fn info(&self) -> Info {
+        Info {
+            name: "Add CORS headers to responses",
+            kind: Kind::Response
+        }
+    }
+
+    async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
+        response.set_header(Header::new("Access-Control-Allow-Origin", "https://paninocode.github.io"));
+        response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS"));
+        response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+    }
 }
 
 #[derive(Serialize)] //Deriving the Serialize trait to be able to convert the struct to JSON
@@ -47,10 +73,13 @@ fn rocket() -> _ {
 
     let figment = rocket::Config::figment() //Creating a figment (Rocket's configuration)
         .merge(("address", "127.0.0.1")) //Setting the address to localhost
-        .merge(("port", port)) //Setting the port to the free port
-        .merge(("cli_colors", false)) //Disabling the colors in the console
-        .merge(("log_level", "normal")); //Disabling the logs in the console
+        .merge(("port", port)); //Setting the port to the free port
+        //.merge(("cli_colors", false)) //Disabling the colors in the console
+        //.merge(("log_level", "normal")); //Disabling the logs in the console
 
-    rocket::custom(figment).mount("/", routes![index]).register("/", catchers![not_found]) //Creating the rocket instance
+    rocket::custom(figment)
+        .attach(CORS)
+        .mount("/", routes![index, all_options])
+        .register("/", catchers![not_found]) //Creating the rocket instance
 
 }
