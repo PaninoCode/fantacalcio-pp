@@ -1,12 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fantacalcio++</title>
 </head>
+
 <body>
-    <h1>Hello, World!</h1>
+    <h1>Test connessione plugin</h1>
+    <a style="display:none;" id="tryprotocol" href="fantacalciopp:\\">Apri app</a>
+    <p id="resultText"></p>
 </body>
+<script src="https://code.jquery.com/jquery-3.6.3.min.js"
+    integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+<script>
+    let url = "http://127.0.0.1";
+    let defaultPort = "39136";
+
+    function connectToPlugin(port, callback) {
+        $.ajax({
+            url: url + ":" + port,
+            type: 'GET',
+            success: function (response) {
+                if (response == "plugin, active") {
+                    callback(true);
+                }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                callback(false, errorThrown);
+            }
+        });
+    }
+
+    connectToPlugin(defaultPort, function (result, error) {
+        if (result) {
+            document.querySelector("#resultText").innerHTML = "Connessione riuscita";
+        } else {
+            document.querySelector("#resultText").innerHTML = "Connessione fallita, plugin non attivo<br> Avvia il plugin e riprova";
+            document.querySelector("#tryprotocol").style.display = "block";
+        }
+    });
+
+    document.querySelector("#tryprotocol").addEventListener("click", function (e) {
+        setTimeout(function () {
+            document.getElementById("noprotocol").innerHTML = "No protocol handler found";
+        }, 1200);
+    });
+</script>
+
 </html>

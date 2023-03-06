@@ -12,3 +12,7 @@ features = ["json"]
 [dependencies.serde]
 version = "1.0.152"
 features = ["derive"]
+
+# Winreg (modify the Windows registry, not needed now)
+#[dependencies.winreg]
+#version = "0.11"

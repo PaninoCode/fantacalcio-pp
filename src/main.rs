@@ -5,7 +5,7 @@ use rocket::serde::{Serialize, json::Json}; //Importing the rocket library for t
 
 #[get("/")] //Defining the route -> GET /
 fn index() -> &'static str {
-    "Hello, world!"
+    "plugin, active"
 }
 
 #[derive(Serialize)] //Deriving the Serialize trait to be able to convert the struct to JSON
